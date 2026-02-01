@@ -1,47 +1,28 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-
-# Importações do que criamos nos passos anteriores
-from app.database import engine, Base, get_db
-from app.modules.medicos.models import Medico
-from app.modules.medicos.schemas import MedicoCreate, MedicoResponse
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.database import engine, Base
 
-# Isso aqui cria as tabelas no seu Postgres se elas não existirem
-# É o "quebra-galho" pra não precisar de migrations agora
+# Imports dos Routers
+from app.modules.medicos.router import router as medicos_router
+from app.modules.usuarios.router import router as usuarios_router
+
+# Cria tabelas (Medicos e Usuarios)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Sistema de Gestão Médica")
 
+# CORS (Fundamental pro React conseguir enviar Cookies)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Em produção vc restringe, agora libera geral
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"], 
+    allow_credentials=True, 
     allow_headers=["*"],
 )
 
+# Registra as rotas
+app.include_router(medicos_router)
+app.include_router(usuarios_router)
 
-
-@app.post("/medicos/", response_model=MedicoResponse)
-def criar_medico(medico: MedicoCreate, db: Session = Depends(get_db)):
-
-    db_medico = db.query(Medico).filter(Medico.email == medico.email).first()
-    if db_medico:
-        raise HTTPException(status_code=400, detail="Email já cadastrado")
-    
-    novo_medico = Medico(
-        name=medico.name,
-        last_name=medico.last_name,
-        email=medico.email
-    )
-    
-    db.add(novo_medico)
-    db.commit()
-    db.refresh(novo_medico)
-    return novo_medico
-
-@app.get("/medicos/", response_model=list[MedicoResponse])
-def listar_medicos(db: Session = Depends(get_db)):
-    medicos = db.query(Medico).all()
-    return medicos
+@app.get("/healthcheck")
+def health_check():
+    return {"status": "ok"}
