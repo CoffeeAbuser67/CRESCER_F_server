@@ -42,7 +42,16 @@ def login(user_in: UsuarioLogin, response: Response, db: Session = Depends(get_d
     user = db.query(Usuario).filter(Usuario.email == user_in.email).first()
     if not user or not verify_password(user_in.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
-    
+
+    # 📌 --- LIMPEZA DE TOKENS EXPIRADOS ---
+    # Antes de criar o novo, limpamos o lixo antigo deste usuário específico
+    db.query(UserRefreshToken).filter(
+        UserRefreshToken.usuario_id == user.id,
+        UserRefreshToken.expires_at < datetime.now(timezone.utc)
+    ).delete()
+    # -----------------------------------
+
+
     # 2. Cria os Tokens
     access_token = create_access_token(data={"sub": user.email})
     refresh_token = create_refresh_token(data={"sub": user.email})
