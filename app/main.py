@@ -6,8 +6,6 @@ from app.database import engine, Base
 from app.modules.medicos.router import router as medicos_router
 from app.modules.usuarios.router import router as usuarios_router
 
-# Cria tabelas (Medicos e Usuarios)
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Sistema de Gestão Médica")
 

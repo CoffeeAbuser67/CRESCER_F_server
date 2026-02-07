@@ -1,12 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
+from app.modules.usuarios.models import Usuario
 from .models import Medico
 from .schemas import MedicoCreate, MedicoResponse
-from app.dependencies import get_current_user
-
+from typing import Annotated # 
+from app.auth import get_current_user
 
 router = APIRouter(prefix="/medicos", tags=["Médicos"])
+
+DbSession = Annotated[Session, Depends(get_db)]
+CurrentUser = Annotated[Usuario, Depends(get_current_user)]
+
 
 @router.post("/", response_model=MedicoResponse)
 def criar_medico(medico: MedicoCreate, db: Session = Depends(get_db), user = Depends(get_current_user)):

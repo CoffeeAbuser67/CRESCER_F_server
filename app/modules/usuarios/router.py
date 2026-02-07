@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
+from typing import Annotated # 
+
 
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.auth_utils import get_password_hash, get_token_hash, verify_password, create_access_token, create_refresh_token
-from app.dependencies import get_current_user 
+from app.auth import get_password_hash, get_token_hash, verify_password, create_access_token, create_refresh_token, get_current_user
 
 from app.config.settings import settings
 from datetime import datetime, timedelta, timezone
@@ -14,10 +15,12 @@ from .schemas import UsuarioCreate, UsuarioLogin, UsuarioResponse
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
+DbSession = Annotated[Session, Depends(get_db)]
+CurrentUser = Annotated[Usuario, Depends(get_current_user)]
 
 # [ROUTE] /regsister 
 @router.post("/register", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)
-def register(user_in: UsuarioCreate, db: Session = Depends(get_db)):
+def register(user_in: UsuarioCreate, db: DbSession):
     # Verifica duplicidade
     if db.query(Usuario).filter(Usuario.email == user_in.email).first():
         raise HTTPException(status_code=400, detail="Email já cadastrado")
@@ -37,7 +40,7 @@ def register(user_in: UsuarioCreate, db: Session = Depends(get_db)):
 
 # [ROUTE] /login 
 @router.post("/login")
-def login(user_in: UsuarioLogin, response: Response, db: Session = Depends(get_db)):
+def login(user_in: UsuarioLogin, response: Response, request: Request,  db: DbSession): 
     # 1. Autentica
     user = db.query(Usuario).filter(Usuario.email == user_in.email).first()
     if not user or not verify_password(user_in.password, user.hashed_password):
@@ -67,9 +70,7 @@ def login(user_in: UsuarioLogin, response: Response, db: Session = Depends(get_d
         usuario_id=user.id, # O UUID do usuário
         expires_at=expires_at,
         is_revoked=False,
-
-        # WARN  Em produção, pegue do request.headers.get("User-Agent")
-        user_agent="v1_browser" 
+        user_agent=request.headers.get("User-Agent", "Unknown Device")
     )
     db.add(db_refresh_token)
     db.commit()
@@ -107,7 +108,7 @@ def login(user_in: UsuarioLogin, response: Response, db: Session = Depends(get_d
 
 # [ROUTE] /refresh 
 @router.post("/refresh")
-def refresh_token(request: Request, response: Response, db: Session = Depends(get_db)):
+def refresh_token(request: Request, response: Response, db: DbSession): # <--- Uso do Annotated
     # 1. Pega o Refresh Token do Cookie (Somente visível nessa rota por causa do path)
     refresh_token_cookie = request.cookies.get("refresh_token")
     
@@ -187,7 +188,7 @@ def refresh_token(request: Request, response: Response, db: Session = Depends(ge
 
 # [ROUTE] /logout 
 @router.post("/logout")
-def logout(request: Request, response: Response, db: Session = Depends(get_db)):
+def logout(request: Request, response: Response, db: DbSession): 
     # 1. Tenta pegar o refresh token para invalidá-lo no banco
     refresh_token_cookie = request.cookies.get("refresh_token")
     
@@ -212,5 +213,5 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
 
 # [ROUTE] /me 
 @router.get("/me", response_model=UsuarioResponse)
-def get_me(current_user: Usuario = Depends(get_current_user)):
+def get_me(current_user: CurrentUser):
     return current_user

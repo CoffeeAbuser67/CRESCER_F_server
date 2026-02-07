@@ -127,10 +127,10 @@ def refresh():
 # └───────────────────┘
 
 USER = "admin_master"
-EMAIL = "addfsmin@hospital.com"
+EMAIL = "adminho@hospital.com"
 PASS = "senha123"
 
-
+ 
 
 register(USER, EMAIL, PASS)
 
