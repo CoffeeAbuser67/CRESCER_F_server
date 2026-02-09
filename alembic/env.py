@@ -17,9 +17,10 @@ from app.config.settings import settings  # Para pegar a URL segura
 from app.database import Base             # Para pegar o Metadata
 
 
-# IMPORTANTE: Importe seus models aqui para o Alembic "enxergar" as tabelas
+# MODELS: 
 from app.modules.usuarios.models import Usuario, UserRefreshToken
-from app.modules.medicos.models import Medico
+from app.modules.financeiro.models import Paciente, Profissional, Servico, Lancamento
+
 # ------------------------------------------------------------------
 
 # Objeto de configuração do Alembic

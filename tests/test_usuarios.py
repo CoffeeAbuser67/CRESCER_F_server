@@ -9,6 +9,31 @@ client = requests.Session()
 
 
 
+# (●) print_step
+def print_step(step_name):
+    print(f"\n{'┌' + '─' * len(step_name + 'øø') + '┐'}")
+    print(f"│ {step_name} │")
+    print(f"{'└' + '─' * len(step_name + 'øø') + '┘'}")
+
+
+
+# (●) check_response
+def check_response(response, label=""):
+    x = str(response.status_code)
+    if x[0] == '2':
+        print(f"✔ [SUCESSO] {label} - Status: {response.status_code}")
+        try:
+            return response.json()
+        except:
+            return response.text
+    else:
+        print(f"✖ [ERRO] {label} - Status: {response.status_code}")
+        print(f"Detalhe: {response.text}")
+        return None
+    
+
+
+
 
 #  (✪) register ⋙⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫸
 def register(username, email, password):
@@ -53,8 +78,8 @@ def login(email, password):
 
 
 
-
-def logout(): #  ⋙⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫸
+#  (✪) logout ⋙⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫸
+def logout(): 
     print("\n--- 4. TENTANDO FAZER LOGOUT ---")
     url = f"{BASE_URL}/auth/logout"
     
@@ -67,33 +92,6 @@ def logout(): #  ⋙⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘
     print("Cookies restantes na sessão:", client.cookies.get_dict())
     
     
-
-
-
-
-#  (✪) testar_rota_protegida_medico ⋙⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫸
-def testar_rota_protegida_medico():
-    print("\n--- 3. TENTANDO CRIAR MÉDICO (Rota Protegida) ---")
-    url = f"{BASE_URL}/medicos/"
-    
-    payload = {
-        "name": "Dr. Chase",
-        "last_name": "Robert",
-        "email": "asesdassa@princeton.org"
-    }
-
-    # Como estamos usando o 'client' (Session) que já tem o cookie, deve passar
-    response = client.post(url, json=payload)
-    
-    # Se der erro (ex: 401), vai mostrar o motivo
-    if response.status_code != 200 and response.status_code != 201:
-        print(f"❌ Falha (Status {response.status_code}):")
-        print(response.text)
-    
-    response.raise_for_status()
-    print("✅ Médico criado com sucesso (Autenticação funcionou)!")
-    print(json.dumps(response.json(), indent=4))
-
 
 
 
@@ -117,65 +115,30 @@ def refresh():
 
 
 
-# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-#  ø●○● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○ø ║                                                                                 ║
-# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+# (●) ╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════╗ ┌──────┐
+# (●) ║ ø●○● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○○ ●●●● ○○○ø ║ │ MAIN │  ⋙────────➤
+# (●) ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════╝ └──────┘
 
 
-# ┌───────────────────┐
-# │ TESTE DE SANIDADE │
-# └───────────────────┘
+# ● ┌───────────────────┐
+# ● │ TESTE DE SANIDADE │
+# ● └───────────────────┘
 
 USER = "admin_master"
 EMAIL = "adminho@hospital.com"
 PASS = "senha123"
 
- 
-
 register(USER, EMAIL, PASS)
-
-
 login(EMAIL, PASS)
-
-
-testar_rota_protegida_medico()
-
-
+refresh()
 logout()
 
 
-refresh()
 
 
 
 
 
-url = f"{BASE_URL}/medicos/"
-response = requests.get(url)
-response.raise_for_status()
-print("✅ Lista Recebida:")
-print(json.dumps(response.json(), indent=4))
-
-
-
-
-
-
-
-
-
-
-def listar_medicos():
-    print("\n--- LISTANDO MÉDICOS ---")
-    url = f"{BASE_URL}/medicos/"
-    
-    response = requests.get(url)
-    
-    # Vai estourar se não for 200 OK
-    response.raise_for_status()
-    
-    print("✅ Lista Recebida:")
-    print(json.dumps(response.json(), indent=4))
 
 
 

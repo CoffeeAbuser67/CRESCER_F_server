@@ -3,9 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 
 # Imports dos Routers
-from app.modules.medicos.router import router as medicos_router
-from app.modules.usuarios.router import router as usuarios_router
 
+
+from app.modules.usuarios.router import router as usuarios_router
+from app.modules.financeiro.router import router as financeiro_router
 
 app = FastAPI(title="Sistema de Gestão Médica")
 
@@ -19,8 +20,8 @@ app.add_middleware(
 )
 
 # Registra as rotas
-app.include_router(medicos_router)
 app.include_router(usuarios_router)
+app.include_router(financeiro_router)
 
 @app.get("/healthcheck")
 def health_check():
