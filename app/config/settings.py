@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     
     # Access Token CURTO (Segurança)
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 10
     
     # Refresh Token LONGO (Conveniência)
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7 

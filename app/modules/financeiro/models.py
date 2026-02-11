@@ -42,7 +42,6 @@ class Servico(TimeStampedModel):
 
     nome = Column(String, nullable=False, unique=True)
     categoria = Column(Enum(CategoriaServico), nullable=False)
-    preco_padrao = Column(Numeric(10, 2), nullable=True) # Numeric é vital para dinheiro
 
     lancamentos = relationship("Lancamento", back_populates="servico")
 

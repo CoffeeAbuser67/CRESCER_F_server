@@ -5,53 +5,102 @@ from decimal import Decimal
 from typing import Optional
 from .models import CategoriaServico, MetodoPagamento
 
-# --- SCHEMAS DE PACIENTE ---
-class PacienteBase(BaseModel):
+
+# ── ⋙────── SCHEMAS DE PACIENTE ─────────➤
+
+
+
+
+class PacienteMinimo(BaseModel): # <●> PacienteMinimo
+    id: UUID
+    nome: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PacienteBase(BaseModel): # <●> PacienteBase
     nome: str = Field(..., min_length=2, max_length=100)
     telefone: Optional[str] = None
 
-class PacienteCreate(PacienteBase):
+
+class PacienteCreate(PacienteBase): # <●> PacienteCreate
     pass
 
-class PacienteResponse(PacienteBase):
+
+
+class PacienteResponse(PacienteBase): # <●> PacienteResponse
     id: UUID
     # Adicionamos o ConfigDict para o Pydantic ler o modelo do SQLAlchemy
     model_config = ConfigDict(from_attributes=True)
 
-# --- SCHEMAS DE PROFISSIONAL ---
-class ProfissionalBase(BaseModel):
+
+# ── ⋙────── SCHEMAS DE PROFISSIONAL ─────────➤
+
+
+
+
+class ProfissionalMinimo(BaseModel):
+    id: UUID
+    nome: str
+    ativo: bool
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+
+class ProfissionalBase(BaseModel): # <●> ProfissionalBase
     nome: str
     ativo: bool = True
 
-class ProfissionalCreate(ProfissionalBase):
+
+
+class ProfissionalCreate(ProfissionalBase): # <●> ProfissionalCreate
     pass
 
-class ProfissionalResponse(ProfissionalBase):
+
+class ProfissionalResponse(ProfissionalBase): # <●> ProfissionalResponse
     id: UUID
     model_config = ConfigDict(from_attributes=True)
 
-# --- SCHEMAS DE SERVIÇO ---
-class ServicoBase(BaseModel):
+
+# ── ⋙────── SCHEMAS DE SERVIÇO ─────────➤
+
+
+
+
+
+
+
+
+
+class ServicoMinimo(BaseModel): # <●> ServicoMinimo
+    id: UUID
+    nome: str
+    categoria: str
+    model_config = ConfigDict(from_attributes=True)
+class ServicoBase(BaseModel): # <●> ServicoBase
     nome: str
     categoria: CategoriaServico
-    preco_padrao: Optional[Decimal] = None
 
-class ServicoCreate(ServicoBase):
+class ServicoCreate(ServicoBase): # <●> ServicoCreate
     pass
 
-class ServicoResponse(ServicoBase):
+class ServicoResponse(ServicoBase): # <●> ServicoResponse
     id: UUID
     model_config = ConfigDict(from_attributes=True)
 
-# --- SCHEMAS DE LANÇAMENTO ---
-class LancamentoBase(BaseModel):
+
+
+
+# ── ⋙────── SCHEMAS DE LANÇAMENTO ─────────➤
+class LancamentoBase(BaseModel): # <●> LancamentoBase
     data_pagamento: date
     data_competencia: date
     valor: Decimal = Field(..., gt=0)
     metodo_pagamento: MetodoPagamento
     observacao: Optional[str] = None
 
-class LancamentoCreate(LancamentoBase):
+
+class LancamentoCreate(LancamentoBase): # <●> LancamentoCreate
     servico_id: UUID
     profissional_id: Optional[UUID] = None
     
@@ -66,10 +115,21 @@ class LancamentoCreate(LancamentoBase):
         return self
 
 
-class LancamentoResponse(LancamentoBase):
+class LancamentoResponse(BaseModel): # <●> LancamentoResponse
     id: UUID
-    paciente: PacienteResponse
-    servico: ServicoResponse
-    profissional: Optional[ProfissionalResponse] = None
+    data_pagamento: date
+    data_competencia: date
+    valor: Decimal
+    metodo_pagamento: str
+    observacao: Optional[str] = None
     
+    paciente: Optional[PacienteMinimo] = None 
+    servico: ServicoMinimo = None # (Defina um schema de serviço tbm se precisar)
+    profissional: Optional[ProfissionalMinimo] = None
     model_config = ConfigDict(from_attributes=True)
+
+
+
+
+
+

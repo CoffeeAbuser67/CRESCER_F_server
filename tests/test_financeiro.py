@@ -75,7 +75,7 @@ prof_id = prof_data['id']
 resp_serv_cons = session.post(f"{API_URL}/servicos", json={
     "nome": "Consulta Cardiológica",
     "categoria": "CONSULTA",
-    "preco_padrao": 350.00
+
 })
 
 serv_cons_data = check_response(resp_serv_cons, "Criar Serviço (Consulta)")
@@ -87,7 +87,7 @@ serv_cons_id = serv_cons_data['id']
 resp_serv_ter = session.post(f"{API_URL}/servicos", json={
     "nome": "Sessão de RPG",
     "categoria": "TERAPIA",
-    "preco_padrao": 150.00
+
 })
 
 serv_ter_data = check_response(resp_serv_ter, "Criar Serviço (Terapia)")
